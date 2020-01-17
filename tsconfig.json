@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "allowUmdGlobalAccess": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "alwaysStrict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "target": "ES5",
+    "module": "CommonJS",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "rootDir": "src",
+    "outDir": "lib",
+    "sourceMap": true
+  },
+  "include": ["src/**/*"]
+}
