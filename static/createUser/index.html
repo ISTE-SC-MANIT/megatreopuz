@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="google-signin-client_id"
+      content="65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com"
+    />
+    <title>Create User</title>
+  </head>
+
+  <body>
+    <h1>Create User</h1>
+    <form id="msform">
+      <h2 class="fs-title">update your account</h2>
+      <input type="text" name="college" id="college" placeholder="college" />
+      <input type="text" name="year" id="year" placeholder="year" />
+      <input type="text" name="Country" id="country" placeholder="country" />
+      <input type="text" name="phone" id="phone" placeholder="Mobile no." />
+      <a href="http://localhost:3000/static"
+        ><input type="submit" value="submit"
+      /></a>
+    </form>
+    <a href="http://localhost:3000/static/" onclick="signOut();">Sign out</a>
+    <p>
+      This example demonstrates how to assign an "onsubmit" event to a form
+      element.
+    </p>
+
+    <p>
+      When you submit the form, a function is triggered which alerts some text.
+    </p>
+
+    <script
+      src="https://apis.google.com/js/platform.js?onload=onLoad"
+      async
+      defer
+    ></script>
+    <script>
+      function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function() {
+          console.log("User signed out.");
+        });
+      }
+
+      function onLoad() {
+        gapi.load("auth2", function() {
+          gapi.auth2.init();
+        });
+      }
+
+      document.getElementById("msform").addEventListener("submit", e => {
+        e.preventDefault();
+        const year = document.getElementById("year").value;
+        const college = document.getElementById("college").value;
+        const country = document.getElementById("country").value;
+        const phone = document.getElementById("phone").value;
+        console.log(year);
+        console.log(college);
+        console.log(country);
+
+        const cookies = document.cookie.split("access_token=");
+        // console.log(cookies);
+        if (cookies.length !== 2) return;
+
+        const token = cookies[1].split(";")[0];
+        console.log(token);
+
+        fetch("/signUp", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            token,
+            year,
+            college,
+            country,
+            phone
+          })
+        }).then(res => res.json());
+      });
+    </script>
+  </body>
+</html>

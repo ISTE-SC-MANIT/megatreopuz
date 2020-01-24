@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="google-signin-client_id"
+      content="65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com"
+    />
+    <title>Dashboard</title>
+  </head>
+
+  <body>
+    <script>
+      function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function() {
+          console.log("User signed out.");
+        });
+      }
+
+      function onLoad() {
+        gapi.load("auth2", function() {
+          gapi.auth2.init();
+        });
+      }
+    </script>
+    <h1>Dashboard</h1>
+    <a href="http://localhost:3000/static/" onclick="signOut();">Sign out</a>
+
+    <script
+      src="https://apis.google.com/js/platform.js?onload=onLoad"
+      async
+      defer
+    ></script>
+  </body>
+</html>

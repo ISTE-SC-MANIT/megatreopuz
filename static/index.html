@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="google-signin-client_id"
+      content="65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com"
+    />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Hello World</h1>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <a href="#" onclick="signOut();">Sign out</a>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+      function onSignIn(googleUser) {
+        const token = googleUser.getAuthResponse().id_token;
+        var profile = googleUser.getBasicProfile();
+        document.cookie = `access_token=${token}`;
+
+        fetch("http://localhost:3000/authenticate", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            authentication: token
+          })
+        })
+          .then(res => res.json())
+          .then(({ exists }) => {
+            if (exists) window.open("/static/dashboard", "_self");
+            else window.open("/static/createUser", "_self");
+          })
+          .catch(console.error);
+      }
+
+      function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function() {
+          console.log("User signed out.");
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -17,7 +17,9 @@
     "noImplicitThis": true,
     "rootDir": "src",
     "outDir": "out",
-    "sourceMap": true
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": ["src/**/*"]
 }
