@@ -1,8 +1,11 @@
 import { prop as Property, Typegoose } from "@typegoose/typegoose";
 import { Field, ObjectType } from "type-graphql";
-
+import { ObjectId } from "mongodb";
 @ObjectType()
 export class User extends Typegoose {
+  @Field()
+  readonly _id: ObjectId;
+
   @Field()
   @Property({ required: true })
   username: string;

@@ -5,7 +5,7 @@ import { OAuth2Client } from "google-auth-library";
 import User from "./models/users";
 import graphqlHttp from "express-graphql";
 import { buildSchema, emitSchemaDefinitionFile } from "type-graphql";
-import viewdata from "./resolver/viewdata"
+import viewdata from "./resolver/viewdata";
 import expressPlayground from "graphql-playground-middleware-express";
 
 env.config();
@@ -107,25 +107,32 @@ app.post("/signUp", express.json(), async (req, res) => {
 
 app.use("/graphql", async (req, res, next) => {
   // req - header -> authentication : token
-  const token = req.get("access_token");
-  if (!token) {
-    res.sendStatus(401);
-    return next();
-  }
-  // Check -> 1. Valid google account
-  const profile = getProfileFromGoogle(token);
-  if (!profile) {
-    res.sendStatus(401);
-    return next();
-  }
-  let exists = false;
-  // Check -> 2. User exists
-  const x = User.findOne({ email: (await profile).email });
-  if (!x) res.sendStatus(400);
+
+  // const token = req.get("access_token");
+  // if (!token) {
+  //   res.sendStatus(401);
+
+  //   return null;
+  // }
+  // console.log("got token");
+  // // Check -> 1. Valid google account
+  // const profile = await getProfileFromGoogle(token);
+  // if (!profile) {
+  //   res.sendStatus(401);
+  //   return next;
+  // }
+  // let exists = false;
+  // // Check -> 2. User exists
+  // const x = User.findOne({ email: profile.email });
+  // if (!x) {
+  //   res.sendStatus(400);
+  //   return next;
+  // }
   const schema = await buildSchema({
     resolvers: [viewdata]
   });
-  return graphqlHttp( schema, Context:(await profile).email)
+  console.log(schema);
+  return graphqlHttp({ schema });
   //return graphhttp(req res next){schema,context:user as }
 });
 app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
