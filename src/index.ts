@@ -91,6 +91,7 @@ export interface Context {
 
 app.use("/graphql", async (req, res, next) => {
   const token = req.get("authorization");
+
   if (!token) {
     res.sendStatus(401);
     return null;

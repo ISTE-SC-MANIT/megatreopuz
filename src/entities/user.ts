@@ -33,6 +33,10 @@ export class User {
   @Field({ nullable: true })
   @Property()
   admin?: boolean;
+
+  @Field()
+  @Property()
+  currentquestion: Number;
 }
 
 export default getModelForClass(User);

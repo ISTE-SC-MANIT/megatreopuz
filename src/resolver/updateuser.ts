@@ -1,18 +1,11 @@
 import { Context } from "./../index";
 import UserModel, { User } from "./../entities/user";
 import { userInput } from "../resolver/input/updateinput";
+import { QuestionInput } from "../resolver/input/questioninput";
 import "reflect-metadata";
-import {
-  Resolver,
-  Query,
-  FieldResolver,
-  Arg,
-  Root,
-  ResolverInterface,
-  Ctx,
-  Args,
-  Mutation
-} from "type-graphql";
+import { Resolver, Arg, Ctx, Mutation } from "type-graphql";
+import QuestionModel, { Question } from "../entities/question";
+
 @Resolver(User)
 export default class updateuser {
   @Mutation(returns => User)
@@ -100,5 +93,22 @@ export default class updateuser {
         console.log(err);
       });
     }
+  }
+
+  @Mutation(returns => Question)
+  async createquestion(
+    @Arg("questioninfo") questionInput: QuestionInput,
+    @Ctx() context: Context
+  ) {
+    const question = new QuestionModel({
+      questionno: questionInput.questionno,
+      description: questionInput.description,
+      answer: questionInput.answer,
+      imgurl: questionInput.imgurl
+    });
+
+    return question.save().then(result => {
+      return result;
+    });
   }
 }
