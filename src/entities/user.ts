@@ -9,6 +9,9 @@ export class User {
   @Field()
   @Property({ required: true })
   username: string;
+  @Field()
+  @Property({ required: true })
+  name: string;
 
   @Field({ nullable: true })
   @Property()

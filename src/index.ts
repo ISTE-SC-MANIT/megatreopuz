@@ -49,9 +49,9 @@ app.post("/authenticate", express.json(), async (req, res) => {
 
 app.post("/signUp", express.json(), async (req, res) => {
   const {
-    body: { token, college, year, phone, country }
+    body: { token, college, year, phone, country, username }
   } = req;
-  if (!token || !college || !year || !phone || !country) {
+  if (!token || !college || !year || !phone || !country || !username) {
     res.sendStatus(400);
     return;
   }
@@ -71,7 +71,8 @@ app.post("/signUp", express.json(), async (req, res) => {
 
   await new User({
     id: uuid(),
-    username: profile.given_name,
+    name: profile.given_name,
+    username: username,
     email: profile.email,
     college: college,
     phone: phone,

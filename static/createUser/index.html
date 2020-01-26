@@ -15,10 +15,12 @@
     <h1>Create User</h1>
     <form id="msform">
       <h2 class="fs-title">update your account</h2>
+      <input type="text" name="username" id="username" placeholder="username" />
       <input type="text" name="college" id="college" placeholder="college" />
       <input type="text" name="year" id="year" placeholder="year" />
       <input type="text" name="Country" id="country" placeholder="country" />
       <input type="text" name="phone" id="phone" placeholder="Mobile no." />
+
       <a href="http://localhost:3000/static"
         ><input type="submit" value="submit"
       /></a>
@@ -58,6 +60,7 @@
         const college = document.getElementById("college").value;
         const country = document.getElementById("country").value;
         const phone = document.getElementById("phone").value;
+        const username = document.getElementById("username").value;
         console.log(year);
         console.log(college);
         console.log(country);
@@ -80,7 +83,8 @@
             year,
             college,
             country,
-            phone
+            phone,
+            username
           })
         }).then(res => res.json());
       });
