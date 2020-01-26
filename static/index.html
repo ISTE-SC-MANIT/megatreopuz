@@ -21,7 +21,7 @@
         var profile = googleUser.getBasicProfile();
         document.cookie = `access_token=${token}`;
 
-        fetch("http://localhost:3000/authenticate", {
+        fetch("/authenticate", {
           method: "POST",
           headers: {
             Accept: "application/json",
