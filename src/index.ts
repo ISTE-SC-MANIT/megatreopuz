@@ -1,4 +1,5 @@
 import express from "express";
+
 import env from "dotenv";
 import mongoose from "mongoose";
 import { OAuth2Client } from "google-auth-library";
@@ -10,9 +11,11 @@ import deleteuser from "./resolver/delete";
 import updateuser from "./resolver/updateuser";
 import expressPlayground from "graphql-playground-middleware-express";
 import uuid from "uuid/v4";
+import cors from "cors";
 env.config();
 
 const app = express();
+app.use(cors());
 
 app.use("/static", express.static("static"));
 
