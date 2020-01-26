@@ -36,7 +36,7 @@ export class User {
 
   @Field()
   @Property()
-  currentquestion: Number;
+  currentquestion: number;
 }
 
 export default getModelForClass(User);

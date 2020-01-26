@@ -1,10 +1,13 @@
 import { Context } from "./../index";
 import UserModel, { User } from "./../entities/user";
+import QuestionModel, { Question } from "../entities/question";
+import AnswerModel, { Answer } from "./../entities/answer";
 import { userInput } from "../resolver/input/updateinput";
 import { QuestionInput } from "../resolver/input/questioninput";
+import { AnswerInput } from "../resolver/input/answerinput";
+
 import "reflect-metadata";
 import { Resolver, Arg, Ctx, Mutation } from "type-graphql";
-import QuestionModel, { Question } from "../entities/question";
 
 @Resolver(User)
 export default class updateuser {
@@ -110,5 +113,34 @@ export default class updateuser {
     return question.save().then(result => {
       return result;
     });
+  }
+  @Mutation(returns => Answer)
+  async answerquestion(
+    @Arg("answerinfo") answerInput: AnswerInput,
+    @Ctx() context: Context
+  ) {
+    const answer = new AnswerModel({
+      questionno: context.user.currentquestion,
+      answer: answerInput.answer,
+      userid: context.user.id
+    });
+    const userquestion = QuestionModel.findOne({
+      questionno: context.user.currentquestion
+    });
+    console.log((await userquestion).answer);
+    if ((await userquestion).answer == answerInput.answer) {
+      return answer.save().then(() => {
+        return UserModel.updateOne(
+          { email: context.user.email },
+          {
+            $set: {
+              currentquestion: context.user.currentquestion + 1
+            }
+          }
+        );
+      });
+    } else {
+      console.log("wrong answer");
+    }
   }
 }

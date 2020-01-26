@@ -72,7 +72,8 @@ app.post("/signUp", express.json(), async (req, res) => {
     email: profile.email,
     college: college,
     phone: phone,
-    admin: "false"
+    admin: false,
+    currentquestion: 1
   })
     .save()
     .then(newUser => {
