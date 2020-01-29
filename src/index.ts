@@ -51,6 +51,7 @@ app.post("/signUp", express.json(), async (req, res) => {
   const {
     body: { token, college, year, phone, country, username }
   } = req;
+
   if (!token || !college || !year || !phone || !country || !username) {
     res.sendStatus(400);
     return;
@@ -71,17 +72,22 @@ app.post("/signUp", express.json(), async (req, res) => {
 
   await new User({
     id: uuid(),
-    name: profile.given_name,
     username: username,
+    name: profile.given_name,
+
     email: profile.email,
-    college: college,
     phone: phone,
+    college: college,
+    year: year,
+
+    country: country,
     admin: false,
     currentquestion: 1
   })
     .save()
     .then(newUser => {
       res.sendStatus(201);
+      console.log("user succusefully savd");
     })
     .catch(err => res.status(500).json(err));
 });

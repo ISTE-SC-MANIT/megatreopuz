@@ -1,5 +1,11 @@
-import { prop as Property, getModelForClass } from "@typegoose/typegoose";
+import {
+  prop as Property,
+  getModelForClass,
+  arrayProp as ArrayProperty
+} from "@typegoose/typegoose";
 import { Field, ObjectType } from "type-graphql";
+import { Question } from "./question";
+import QuestionModel from "./question";
 @ObjectType()
 export class User {
   @Field()
@@ -14,32 +20,36 @@ export class User {
   name: string;
 
   @Field({ nullable: true })
-  @Property()
+  @Property({ required: true })
   email?: string;
 
-  @Field({ nullable: true })
-  @Property()
+  @Field()
+  @Property({ required: true })
   phone?: string;
 
-  @Field({ nullable: true })
-  @Property()
+  @Field()
+  @Property({ required: true })
   college?: string;
 
-  @Field({ nullable: true })
-  @Property()
+  @Field()
+  @Property({ required: true })
   year?: string;
 
-  @Field({ nullable: true })
-  @Property()
+  @Field()
+  @Property({ required: true })
   country?: string;
 
-  @Field({ nullable: true })
-  @Property()
+  @Field()
+  @Property({ required: true })
   admin?: boolean;
 
   @Field()
   @Property()
   currentquestion: number;
+
+  @Field(type => [Question])
+  @ArrayProperty({ items: Question, default: [], ref: Question })
+  ratings: Question[];
 }
 
 export default getModelForClass(User);

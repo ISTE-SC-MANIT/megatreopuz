@@ -31,4 +31,21 @@ export default class viewdata {
       questionno: context.user.currentquestion
     });
   }
+  @Query(returns => [User!]!)
+  async leaderboard(@Ctx() context: Context) {
+    console.log(await await UserModel.find().sort({ currentquestion: -1 }));
+    return await UserModel.find()
+      .then(users => {
+        // return users.map(user => {
+        //   return { user };
+        // });
+      })
+      .catch(err => {
+        throw err;
+      });
+  }
+  @Query(returns => [User])
+  async recipes(): Promise<User[]> {
+    return await UserModel.find({}).sort({ currentquestion: -1 });
+  }
 }

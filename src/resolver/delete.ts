@@ -6,6 +6,11 @@ import { Resolver, Query, Ctx, Mutation } from "type-graphql";
 export default class deleteuser {
   @Mutation(returns => User)
   async delete(@Ctx() context: Context) {
-    return await UserModel.deleteOne({ email: context.user.email });
+    const user = await UserModel.findOne({
+      email: context.user.email
+    });
+    await UserModel.deleteOne({ email: context.user.email });
+
+    return user;
   }
 }

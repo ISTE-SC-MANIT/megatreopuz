@@ -1,21 +1,17 @@
 import { prop as Property, getModelForClass } from "@typegoose/typegoose";
 import { Field, ObjectType } from "type-graphql";
 @ObjectType()
-export class Answer {
+export class Conteststate {
   @Field()
   @Property({ required: true })
-  questionno: Number;
-
+  currentstate: String;
   @Field()
   @Property({ required: true })
-  userid: string;
-
-  @Field()
-  @Property({ required: true })
-  answer: string;
-  @Field()
-  @Property({ required: true })
-  message: string;
+  stateinfo: String;
 }
 
-export default getModelForClass(Answer);
+export default getModelForClass(Conteststate);
+export interface NotificationPayload {
+  stateinfo: string;
+  currentstate: String;
+}
