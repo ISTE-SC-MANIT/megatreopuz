@@ -1,8 +1,7 @@
-
 import { InputType, Field, Int } from "type-graphql";
 
 @InputType()
-export class userInput {
+export class UserInput {
   @Field({ nullable: true })
   collge?: String;
 

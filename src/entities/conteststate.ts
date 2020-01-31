@@ -4,14 +4,10 @@ import { Field, ObjectType } from "type-graphql";
 export class Conteststate {
   @Field()
   @Property({ required: true })
-  currentstate: String;
-  @Field()
-  @Property({ required: true })
-  stateinfo: String;
+  stateinfo: Boolean;
 }
 
 export default getModelForClass(Conteststate);
 export interface NotificationPayload {
-  stateinfo: string;
-  currentstate: String;
+  stateinfo: Boolean;
 }

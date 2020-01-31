@@ -36,6 +36,10 @@ export class User {
   year?: string;
 
   @Field()
+  @Property({})
+  LastAnsweredQuestionTime: Date;
+
+  @Field()
   @Property({ required: true })
   country?: string;
 
@@ -46,6 +50,18 @@ export class User {
   @Field()
   @Property()
   currentquestion: number;
+
+  @Field()
+  @Property({ default: 0 })
+  LastAnsweredQuestion: number;
+
+  @Field()
+  @Property({ default: 0 })
+  TotalQuestionsAnswered: number;
+
+  @Field()
+  @Property({ default: 0 })
+  Rank: number;
 
   @Field(type => [Question])
   @ArrayProperty({ items: Question, default: [], ref: Question })

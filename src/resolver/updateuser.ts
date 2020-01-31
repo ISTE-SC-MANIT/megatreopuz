@@ -6,7 +6,7 @@ import ConeteststateModel, {
   Conteststate,
   NotificationPayload
 } from "./../entities/conteststate";
-import { userInput } from "../resolver/input/updateinput";
+import { UserInput } from "../resolver/input/updateinput";
 import { QuestionInput } from "../resolver/input/questioninput";
 import { AnswerInput } from "../resolver/input/answerinput";
 import { Notification } from "./subscription/notification";
@@ -28,8 +28,8 @@ import { ConteststateInput } from "./input/conteststateinput";
 @Resolver(User)
 export default class updateuser {
   @Mutation(returns => User)
-  async updateuser(
-    @Arg("userinfo") UserInput: userInput,
+  async UpdateUser(
+    @Arg("UserInfo") UserInput: UserInput,
     @Ctx() context: Context
   ) {
     // find the recipe
@@ -104,15 +104,15 @@ export default class updateuser {
   }
 
   @Mutation(returns => Question)
-  async createquestion(
-    @Arg("questioninfo") questionInput: QuestionInput,
+  async CreateQuestion(
+    @Arg("QuestionInfo") questionInput: QuestionInput,
     @Ctx() context: Context
   ) {
     const question = new QuestionModel({
-      questionno: questionInput.questionno,
-      description: questionInput.description,
-      answer: questionInput.answer,
-      imgurl: questionInput.imgurl
+      QuestionNo: questionInput.QuestionNo,
+      Description: questionInput.Description,
+      Answer: questionInput.Answer,
+      ImgUrl: questionInput.ImgUrl
     });
 
     return question.save().then(result => {
@@ -120,123 +120,120 @@ export default class updateuser {
     });
   }
   @Mutation(returns => Conteststate)
-  async createconteststate() {
+  async CreateConteststate() {
     const conteststate = new ConeteststateModel({
-      stateinfo: "Megatreopuz 2020",
-      currentstate: "will start soon"
+      stateinfo: true
     });
 
     return conteststate.save().then(result => {
       return result;
     });
   }
-  // @Subscription({
-  //   topics: "NOTIFICATIONS",
-  //   filter: ({ payload, args }) => args.priorities.includes(payload.priority)
-  // })
-  // newNotification(
-  //   @Root() notificationPayload: NotificationPayload
-  // ): Notification {
-  //   return {
-  //     ...notificationPayload,
-  //     date: new Date()
-  //   };
-  // }
-  @Mutation(returns => Conteststate)
-  async pubSubMutation(
-    @PubSub() pubSub: PubSubEngine,
-    @Arg("currentstate") currentstate: string
-  ) {
-    const payload: NotificationPayload = {
-      stateinfo: "Megatreopuz 2020",
-      currentstate
-    };
-    await pubSub.publish("NOTIFICATIONS", payload);
 
-    const updatedstate = await ConeteststateModel.updateOne(
-      { stateinfo: "Megatreopuz 2020" },
-      {
-        $set: {
-          currentstate: currentstate
-        }
-      }
-    );
-    return await ConeteststateModel.findOne({
-      stateinfo: "Megatreopuz 2020"
-    });
-  }
+  // @Mutation(returns => Conteststate)
+  // async PubSubMutation(
+  //   @PubSub() pubSub: PubSubEngine,
+  //   @Arg("CurrentState") currentstate: string
+  // ) {
+  //   const payload: NotificationPayload = {
+  //     stateinfo: "Megatreopuz 2020",
+  //     currentstate
+  //   };
+  //   await pubSub.publish("NOTIFICATIONS", payload);
+
+  //   const updatedstate = await ConeteststateModel.updateOne(
+  //     { stateinfo: "Megatreopuz 2020" },
+  //     {
+  //       $set: {
+  //         currentstate: currentstate
+  //       }
+  //     }
+  //   );
+  //   return await ConeteststateModel.findOne({
+  //     stateinfo: "Megatreopuz 2020"
+  //   });
+  // }
 
   @Subscription({ topics: "NOTIFICATIONS" })
-  normalSubscription(
-    @Root() { stateinfo, currentstate }: NotificationPayload
+  StateChangeSubscription(
+    @Root() { stateinfo }: NotificationPayload
   ): Conteststate {
     console.log("its here");
-    return { stateinfo, currentstate };
+    return { stateinfo };
   }
 
   @Mutation(returns => Conteststate)
-  async changeconteststate(
-    @Arg("stateinfo") stateInput: ConteststateInput,
+  async ChangeContestState(
+    @Arg("StateInfo") stateInput: ConteststateInput,
     @PubSub() pubSub: PubSubEngine
   ) {
-    // here we can trigger subscriptions topics
-    // const payload: NotificationPayload = {
-    //   id: 2,
-    //   message: stateInput.conteststate
-    // };
-    // console.log(pay)
-    //await pubSub.publish("NOTIFICATIONS", payload);
-
-    return await ConeteststateModel.updateOne(
-      { stateinfo: "Megatreopuz 2020" },
+    await ConeteststateModel.updateOne(
+      { _id: "5e3309dc60385c117868b158" },
       {
         $set: {
-          currentstate: stateInput.conteststate
+          stateinfo: stateInput.stateinfo
         }
       }
     );
+    return ConeteststateModel.findOne({
+      _id: "5e3309dc60385c117868b158"
+    });
   }
   @Mutation(returns => Answer)
-  async answerquestion(
-    @Arg("answerinfo") answerInput: AnswerInput,
+  async AnswerQuestion(
+    @Arg("AnswerInfo") answerInput: AnswerInput,
     @Ctx() context: Context
   ) {
     const answer = new AnswerModel({
-      questionno: context.user.currentquestion,
-      answer: answerInput.answer,
-      userid: context.user.id
+      QuestionNo: context.user.currentquestion,
+      Answer: answerInput.Answer,
+      UserId: context.user.id
     });
 
     const userquestion = QuestionModel.findOne({
-      questionno: context.user.currentquestion
+      QuestionNo: context.user.currentquestion
     });
 
-    UserModel.findOneAndUpdate(
-      { email: context.user.email },
-      {
-        $push: {
-          ratings: {
-            $each: [
-              {
-                _id: (await userquestion)._id
-              }
-            ]
+    console.log((await userquestion).Answer);
+    if ((await userquestion).Answer == answerInput.Answer) {
+      UserModel.findOneAndUpdate(
+        { email: context.user.email },
+        {
+          $push: {
+            ratings: {
+              $each: [
+                {
+                  _id: (await userquestion)._id
+                }
+              ]
+            }
+          }
+        },
+        function(err, data) {
+          if (data) {
+            console.log(data);
+          } else {
+            console.log(err);
           }
         }
-      },
-      function(err, data) {
-        if (data) {
-          console.log(data);
-        } else {
-          console.log(err);
+      );
+      UserModel.findOneAndUpdate(
+        { email: context.user.email },
+        {
+          TotalQuestionsAnswered: context.user.TotalQuestionsAnswered + 1,
+          LastAnsweredQuestion: context.user.currentquestion - 1,
+          LastAnsweredQuestionTime: new Date()
+        },
+        function(err, data) {
+          if (data) {
+            console.log(data);
+          } else {
+            console.log(err);
+          }
         }
-      }
-    );
-
-    console.log((await userquestion).answer);
-    if ((await userquestion).answer == answerInput.answer) {
+      );
       console.log("right answer");
-      answer.message = "Correct answer";
+      answer.Message = "Correct answer";
       await UserModel.updateOne(
         { email: context.user.email },
         {
@@ -250,7 +247,7 @@ export default class updateuser {
         console.log(result + " this is coorect answer");
       });
     } else {
-      answer.message = "Wrong answer, Try again";
+      answer.Message = "Wrong answer, Try again";
     }
     console.log(answer);
     return answer;

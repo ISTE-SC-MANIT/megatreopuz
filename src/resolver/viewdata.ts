@@ -6,7 +6,6 @@ import "reflect-metadata";
 import {
   Resolver,
   Query,
-  FieldResolver,
   Arg,
   Root,
   ResolverInterface,
@@ -17,11 +16,11 @@ import {
 @Resolver(User)
 export default class viewdata {
   @Query(returns => User)
-  async viewer(@Ctx() context: Context) {
+  async Viewer(@Ctx() context: Context) {
     return await UserModel.findOne({ email: context.user.email });
   }
   @Query(returns => Question)
-  async viewquestion(@Ctx() context: Context) {
+  async ViewQuestion(@Ctx() context: Context) {
     console.log(
       await QuestionModel.findOne({
         questionno: context.user.currentquestion
@@ -31,21 +30,44 @@ export default class viewdata {
       questionno: context.user.currentquestion
     });
   }
-  @Query(returns => [User!]!)
-  async leaderboard(@Ctx() context: Context) {
-    console.log(await await UserModel.find().sort({ currentquestion: -1 }));
-    return await UserModel.find()
-      .then(users => {
-        // return users.map(user => {
-        //   return { user };
-        // });
-      })
-      .catch(err => {
-        throw err;
-      });
-  }
+
   @Query(returns => [User])
-  async recipes(): Promise<User[]> {
+  async leaderboard(@Ctx() context: Context): Promise<User[]> {
+    const user = UserModel.findOne({ email: context.user.email });
+
     return await UserModel.find({}).sort({ currentquestion: -1 });
+  }
+
+  @Query(returns => User)
+  async CalculateMyRank(@Ctx() context: Context) {
+    const user = UserModel.findOne({ email: context.user.email });
+
+    const rank = await UserModel.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              LastAnsweredQuestion: { $gt: (await user).LastAnsweredQuestion }
+            },
+            {
+              LastAnsweredQuestionTime: {
+                $lt: new Date((await user).LastAnsweredQuestionTime)
+              }
+            }
+          ]
+        }
+      }
+    ]);
+    console.log(Object.keys(rank).length);
+    await UserModel.updateOne(
+      { email: context.user.email },
+      {
+        $set: {
+          Rank: Object.keys(rank).length + 1
+        }
+      }
+    );
+
+    return await UserModel.findOne({ email: context.user.email });
   }
 }
