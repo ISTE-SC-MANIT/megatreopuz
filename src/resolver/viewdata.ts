@@ -35,29 +35,25 @@ export default class viewdata {
   async leaderboard(@Ctx() context: Context): Promise<User[]> {
     const user = UserModel.findOne({ email: context.user.email });
 
-    return await UserModel.find({}).sort({ currentquestion: -1 });
+    return await UserModel.find({}).sort({ TotalQuestionsAnswered: -1 });
   }
 
   @Query(returns => User)
   async CalculateMyRank(@Ctx() context: Context) {
     const user = UserModel.findOne({ email: context.user.email });
 
-    const rank = await UserModel.aggregate([
-      {
-        $match: {
-          $and: [
-            {
-              LastAnsweredQuestion: { $gt: (await user).LastAnsweredQuestion }
-            },
-            {
-              LastAnsweredQuestionTime: {
-                $lt: new Date((await user).LastAnsweredQuestionTime)
-              }
-            }
-          ]
-        }
+    const rank = await UserModel.find({
+      LastAnsweredQuestionTime: {
+        $lte: new Date((await user).LastAnsweredQuestionTime)
+      },
+      TotalQuestionsAnswered: {
+        $gt: (await UserModel.findOne({ email: context.user.email }))
+          .TotalQuestionsAnswered
       }
-    ]);
+    });
+
+    console.log(rank);
+
     console.log(Object.keys(rank).length);
     await UserModel.updateOne(
       { email: context.user.email },
