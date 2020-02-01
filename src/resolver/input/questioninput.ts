@@ -3,14 +3,14 @@ import { InputType, Field } from "type-graphql";
 @InputType()
 export class QuestionInput {
   @Field()
-  QuestionNo: Number;
+  questionNo: Number;
 
   @Field()
-  Description: string;
+  description: string;
 
   @Field()
-  Answer: string;
+  answer: string;
 
   @Field()
-  ImgUrl: string;
+  imgUrl: string;
 }

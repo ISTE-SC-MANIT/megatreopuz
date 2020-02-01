@@ -1,9 +1,8 @@
 import express from "express";
-
 import env from "dotenv";
 import mongoose from "mongoose";
 import { OAuth2Client } from "google-auth-library";
-import User, { User as UserType } from "./entities/user";
+import User, { User as UserType, UserBase } from "./entities/user";
 import graphqlHttp from "express-graphql";
 import { buildSchema, emitSchemaDefinitionFile } from "type-graphql";
 import viewdata from "./resolver/viewdata";
@@ -69,20 +68,21 @@ app.post("/signUp", express.json(), async (req, res) => {
     res.sendStatus(409);
     return;
   }
-
+  console.log("its here");
   await new User({
     id: uuid(),
-    username: username,
+    userName: username,
     name: profile.given_name,
-
     email: profile.email,
     phone: phone,
     college: college,
     year: year,
-
     country: country,
     admin: false,
-    currentquestion: 1
+    currentQuestion: 1,
+    totalQuestionsAnswered: 0,
+    lastAnsweredQuestion: 0,
+    lastAnsweredQuestionTime: "2020-02-01T16:42:50.859Z"
   })
     .save()
     .then(newUser => {
@@ -93,7 +93,7 @@ app.post("/signUp", express.json(), async (req, res) => {
 });
 
 const schema = buildSchema({
-  resolvers: [viewdata, deleteuser, updateuser]
+  resolvers: [viewdata]
 });
 
 export interface Context {
@@ -107,17 +107,19 @@ app.use("/graphql", async (req, res, next) => {
     res.sendStatus(401);
     return null;
   }
+
   const profile = await getProfileFromGoogle(token);
   if (!profile) {
     res.sendStatus(401);
     return null;
   }
+  console.log("its here");
   const user = await User.findOne({ email: profile.email });
   if (!user) {
     res.sendStatus(400);
     return null;
   }
-
+  console.log(user);
   const resolvedSchema = await schema;
   return graphqlHttp({
     schema: resolvedSchema,

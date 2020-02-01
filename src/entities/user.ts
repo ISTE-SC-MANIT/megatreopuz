@@ -7,14 +7,14 @@ import { Field, ObjectType } from "type-graphql";
 import { Question } from "./question";
 import QuestionModel from "./question";
 @ObjectType()
-export class User {
+export class UserBase {
   @Field()
   @Property({ required: true })
   id: string;
 
   @Field()
   @Property({ required: true })
-  username: string;
+  userName: string;
   @Field()
   @Property({ required: true })
   name: string;
@@ -37,7 +37,7 @@ export class User {
 
   @Field()
   @Property({})
-  LastAnsweredQuestionTime: Date;
+  lastAnsweredQuestionTime: Date;
 
   @Field()
   @Property({ required: true })
@@ -49,23 +49,25 @@ export class User {
 
   @Field()
   @Property()
-  currentquestion: number;
+  currentQuestion: number;
 
   @Field()
   @Property({ default: 0 })
-  LastAnsweredQuestion: number;
+  lastAnsweredQuestion: number;
 
   @Field()
   @Property({ default: 0 })
-  TotalQuestionsAnswered: number;
-
-  @Field()
-  @Property({ default: 0 })
-  Rank: number;
+  totalQuestionsAnswered: number;
 
   @Field(type => [Question])
   @ArrayProperty({ items: Question, default: [], ref: Question })
   ratings: Question[];
 }
 
-export default getModelForClass(User);
+export default getModelForClass(UserBase);
+
+export class User extends UserBase {
+  @Field()
+  @Property({ default: 0 })
+  rank: number;
+}

@@ -4,18 +4,18 @@ import { Field, ObjectType } from "type-graphql";
 export class Answer {
   @Field()
   @Property({ required: true })
-  QuestionNo: Number;
+  questionNo: Number;
 
   @Field()
   @Property({ required: true })
-  UserId: string;
+  userId: string;
 
   @Field()
   @Property({ required: true })
-  Answer: string;
+  answer: string;
   @Field()
   @Property({ required: true })
-  Message: string;
+  message: string;
 }
 
 export default getModelForClass(Answer);

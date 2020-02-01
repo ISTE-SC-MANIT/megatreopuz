@@ -13,57 +13,71 @@ import {
   Args,
   Mutation
 } from "type-graphql";
-@Resolver(User)
+import UserBase from "../entities/user";
+@Resolver(UserBase)
 export default class viewdata {
-  @Query(returns => User)
-  async Viewer(@Ctx() context: Context) {
-    return await UserModel.findOne({ email: context.user.email });
+  @Query(returns => UserBase)
+  async viewer(@Ctx() context: Context) {
+    return await UserBase.findOne({ email: context.user.email });
   }
   @Query(returns => Question)
-  async ViewQuestion(@Ctx() context: Context) {
+  async viewQuestion(@Ctx() context: Context) {
     console.log(
       await QuestionModel.findOne({
-        questionno: context.user.currentquestion
+        questionNo: context.user.currentQuestion
       })
     );
     return await QuestionModel.findOne({
-      questionno: context.user.currentquestion
+      questionNo: context.user.currentQuestion
     });
   }
 
-  @Query(returns => [User])
-  async leaderboard(@Ctx() context: Context): Promise<User[]> {
-    const user = UserModel.findOne({ email: context.user.email });
+  // @Query(returns => User)
+  // async calculateMyRank(@Ctx() context: Context) {
+  //   const user = UserModel.findOne({ email: context.user.email });
 
-    return await UserModel.find({}).sort({ TotalQuestionsAnswered: -1 });
-  }
+  //   const rank = await UserModel.find({
+  //     lastAnsweredQuestionTime: {
+  //       $lte: new Date((await user).lastAnsweredQuestionTime)
+  //     },
+  //     totalQuestionsAnswered: {
+  //       $gt: (await UserModel.findOne({ email: context.user.email }))
+  //         .totalQuestionsAnswered
+  //     }
+  //   });
 
-  @Query(returns => User)
-  async CalculateMyRank(@Ctx() context: Context) {
-    const user = UserModel.findOne({ email: context.user.email });
+  //   console.log(rank);
 
-    const rank = await UserModel.find({
-      LastAnsweredQuestionTime: {
-        $lte: new Date((await user).LastAnsweredQuestionTime)
-      },
-      TotalQuestionsAnswered: {
-        $gt: (await UserModel.findOne({ email: context.user.email }))
-          .TotalQuestionsAnswered
-      }
-    });
+  //   console.log(Object.keys(rank).length);
+  //   await UserModel.updateOne(
+  //     { email: context.user.email },
+  //     {
+  //       $set: {
+  //         rank: Object.keys(rank).length + 1
+  //       }
+  //     }
+  //   );
 
-    console.log(rank);
-
-    console.log(Object.keys(rank).length);
-    await UserModel.updateOne(
-      { email: context.user.email },
-      {
-        $set: {
-          Rank: Object.keys(rank).length + 1
-        }
-      }
-    );
-
-    return await UserModel.findOne({ email: context.user.email });
-  }
+  //   return await UserModel.findOne({ email: context.user.email });
+  // }
 }
+// @Resolver(of => User)
+// export class RankResolver {
+//   // queries and mutations
+
+//   async rank(@Ctx() context: Context) {
+//     const user = UserModel.findOne({ email: context.user.email });
+
+//     const rank = await UserModel.find({
+//       lastAnsweredQuestionTime: {
+//         $lte: new Date((await user).lastAnsweredQuestionTime)
+//       },
+//       totalQuestionsAnswered: {
+//         $gt: (await UserModel.findOne({ email: context.user.email }))
+//           .totalQuestionsAnswered
+//       }
+//     });
+
+//     console.log(rank);
+//   }
+// }

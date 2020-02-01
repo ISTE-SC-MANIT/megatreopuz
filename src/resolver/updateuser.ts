@@ -9,7 +9,6 @@ import ConeteststateModel, {
 import { UserInput } from "../resolver/input/updateinput";
 import { QuestionInput } from "../resolver/input/questioninput";
 import { AnswerInput } from "../resolver/input/answerinput";
-import { Notification } from "./subscription/notification";
 
 import "reflect-metadata";
 import {
@@ -28,7 +27,7 @@ import { ConteststateInput } from "./input/conteststateinput";
 @Resolver(User)
 export default class updateuser {
   @Mutation(returns => User)
-  async UpdateUser(
+  async updateUser(
     @Arg("UserInfo") UserInput: UserInput,
     @Ctx() context: Context
   ) {
@@ -104,15 +103,15 @@ export default class updateuser {
   }
 
   @Mutation(returns => Question)
-  async CreateQuestion(
+  async createQuestion(
     @Arg("QuestionInfo") questionInput: QuestionInput,
     @Ctx() context: Context
   ) {
     const question = new QuestionModel({
-      QuestionNo: questionInput.QuestionNo,
-      Description: questionInput.Description,
-      Answer: questionInput.Answer,
-      ImgUrl: questionInput.ImgUrl
+      QuestionNo: questionInput.questionNo,
+      Description: questionInput.description,
+      Answer: questionInput.answer,
+      ImgUrl: questionInput.imgUrl
     });
 
     return question.save().then(result => {
@@ -120,7 +119,7 @@ export default class updateuser {
     });
   }
   @Mutation(returns => Conteststate)
-  async CreateConteststate() {
+  async createConteststate() {
     const conteststate = new ConeteststateModel({
       stateinfo: true
     });
@@ -155,15 +154,15 @@ export default class updateuser {
   // }
 
   @Subscription({ topics: "NOTIFICATIONS" })
-  StateChangeSubscription(
-    @Root() { stateinfo }: NotificationPayload
+  stateChangeSubscription(
+    @Root() { stateInfo }: NotificationPayload
   ): Conteststate {
     console.log("its here");
-    return { stateinfo };
+    return { stateInfo };
   }
 
   @Mutation(returns => Conteststate)
-  async ChangeContestState(
+  async changeContestState(
     @Arg("StateInfo") stateInput: ConteststateInput,
     @PubSub() pubSub: PubSubEngine
   ) {
@@ -171,7 +170,7 @@ export default class updateuser {
       { _id: "5e3309dc60385c117868b158" },
       {
         $set: {
-          stateinfo: stateInput.stateinfo
+          stateinfo: stateInput.stateInfo
         }
       }
     );
@@ -180,22 +179,22 @@ export default class updateuser {
     });
   }
   @Mutation(returns => Answer)
-  async AnswerQuestion(
+  async answerQuestion(
     @Arg("AnswerInfo") answerInput: AnswerInput,
     @Ctx() context: Context
   ) {
     const answer = new AnswerModel({
-      QuestionNo: context.user.currentquestion,
-      Answer: answerInput.Answer,
-      UserId: context.user.id
+      questionNo: context.user.currentQuestion,
+      answer: answerInput.answer,
+      userId: context.user.id
     });
 
     const userquestion = QuestionModel.findOne({
-      QuestionNo: context.user.currentquestion
+      questionNo: context.user.currentQuestion
     });
 
-    console.log((await userquestion).Answer);
-    if ((await userquestion).Answer == answerInput.Answer) {
+    console.log((await userquestion).answer);
+    if ((await userquestion).answer == answerInput.answer) {
       UserModel.findOneAndUpdate(
         { email: context.user.email },
         {
@@ -220,9 +219,9 @@ export default class updateuser {
       UserModel.findOneAndUpdate(
         { email: context.user.email },
         {
-          TotalQuestionsAnswered: context.user.TotalQuestionsAnswered + 1,
-          LastAnsweredQuestion: context.user.currentquestion - 1,
-          LastAnsweredQuestionTime: new Date()
+          totalQuestionsAnswered: context.user.totalQuestionsAnswered + 1,
+          lastAnsweredQuestion: context.user.currentQuestion - 1,
+          lastAnsweredQuestionTime: new Date()
         },
         function(err, data) {
           if (data) {
@@ -233,12 +232,12 @@ export default class updateuser {
         }
       );
       console.log("right answer");
-      answer.Message = "Correct answer";
+      answer.message = "Correct answer";
       await UserModel.updateOne(
         { email: context.user.email },
         {
           $set: {
-            currentquestion: context.user.currentquestion + 1
+            currentQuestion: context.user.currentQuestion + 1
           }
         }
       );
@@ -247,7 +246,7 @@ export default class updateuser {
         console.log(result + " this is coorect answer");
       });
     } else {
-      answer.Message = "Wrong answer, Try again";
+      answer.message = "Wrong answer, Try again";
     }
     console.log(answer);
     return answer;
