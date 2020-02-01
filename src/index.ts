@@ -1,17 +1,17 @@
 import express from "express";
-
 import env from "dotenv";
 import mongoose from "mongoose";
-import { OAuth2Client } from "google-auth-library";
-import User, { User as UserType } from "./entities/user";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
+import User, { User as UserClass } from "./user/user";
 import graphqlHttp from "express-graphql";
-import { buildSchema, emitSchemaDefinitionFile } from "type-graphql";
-import viewdata from "./resolver/viewdata";
-import deleteuser from "./resolver/delete";
-import updateuser from "./resolver/updateuser";
+import { buildSchema } from "type-graphql";
+import QueryClass from "./user/query";
+import MutationClass from "./user/mutation";
 import expressPlayground from "graphql-playground-middleware-express";
 import uuid from "uuid/v4";
 import cors from "cors";
+import { authorizationLevel } from "./auth";
+import UserFieldResolvers from "./resolver/userFields";
 env.config();
 
 const app = express();
@@ -34,13 +34,9 @@ async function getProfileFromGoogle(token: string) {
 
 app.post("/authenticate", express.json(), async (req, res) => {
     const {
-        body: { authentication: token }
+        body: { email }
     } = req;
-    const profile = await getProfileFromGoogle(token);
-
-    if (!profile || !profile.email) return;
-
-    const user = await User.findOne({ email: profile.email });
+    const user = await User.findOne({ email: email });
     if (user) {
         res.json({ exists: true });
     } else {
@@ -52,6 +48,7 @@ app.post("/signUp", express.json(), async (req, res) => {
     const {
         body: { token, college, year, phone, country, username }
     } = req;
+
     if (!token || !college || !year || !phone || !country || !username) {
         res.sendStatus(400);
         return;
@@ -63,56 +60,50 @@ app.post("/signUp", express.json(), async (req, res) => {
         res.sendStatus(401);
         return;
     }
-    const currentUser = await User.findOne({ email: profile.email });
-
-    if (currentUser) {
-        res.sendStatus(409);
-        return;
-    }
-
     await new User({
         id: uuid(),
-        name: profile.given_name,
-        username: username,
+        userName: username,
+        name: profile.name,
         email: profile.email,
-        college: college,
         phone: phone,
+        college: college,
+        year: year,
+        country: country,
         admin: false,
-        currentquestion: 1
+        currentQuestion: 1,
+        totalQuestionsAnswered: 0,
+        lastAnsweredQuestion: 0,
+        lastAnsweredQuestionTime: "2020-02-01T16:42:50.859Z"
     })
         .save()
         .then(newUser => {
             res.sendStatus(201);
         })
-        .catch(err => res.status(500).json(err));
+        .catch((err: Error) => res.status(500).send(err.message));
 });
 
 const schema = buildSchema({
-    resolvers: [viewdata, deleteuser, updateuser]
+    validate: false,
+    resolvers: [QueryClass, UserFieldResolvers, MutationClass],
+    dateScalarMode: "timestamp",
+    authChecker: authorizationLevel
 });
 
 export interface Context {
-    user: UserType;
+    user?: UserClass;
 }
 
 app.use("/graphql", async (req, res, next) => {
     const token = req.get("authorization");
-
-    if (!token) {
-        res.sendStatus(401);
-        return null;
+    let user: UserClass | null = null;
+    if (token) {
+        const u = await getProfileFromGoogle(token);
+        if (!u) {
+            res.sendStatus(400);
+            return null;
+        }
+        user = await User.findOne({ email: u.email });
     }
-    const profile = await getProfileFromGoogle(token);
-    if (!profile) {
-        res.sendStatus(401);
-        return null;
-    }
-    const user = await User.findOne({ email: profile.email });
-    if (!user) {
-        res.sendStatus(400);
-        return null;
-    }
-
     const resolvedSchema = await schema;
     return graphqlHttp({
         schema: resolvedSchema,
@@ -127,7 +118,11 @@ app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
 mongoose
     .connect(
         "mongodb+srv://Devansh:Devansh@cluster0-ixpyc.mongodb.net/beta?retryWrites=true&w=majority",
-        { useNewUrlParser: true, useUnifiedTopology: true }
+        {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true
+        }
     )
     .then(() =>
         app.listen(process.env.PORT || 3000, () =>
