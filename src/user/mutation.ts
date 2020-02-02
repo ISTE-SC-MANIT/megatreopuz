@@ -18,6 +18,7 @@ export default class MutationClass {
     }
 
     @Mutation(returns => User)
+    @Authorized("USER")
     async updateUser(
         @Arg("userInfo") userInput: UserInput,
         @Ctx() context: Context

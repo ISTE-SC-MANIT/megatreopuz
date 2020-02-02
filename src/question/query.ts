@@ -12,10 +12,13 @@ export default class QueryClass {
         const { lastAnsweredQuestion } = await UserModel.findOne({
             email: context.user.email
         });
-        return await QuestionModel.find({
+        const res = await QuestionModel.find({
             questionNo: { $gt: lastAnsweredQuestion }
         })
             .sort({ questionNo: 1 })
             .limit(1);
+
+        if (!res || !res.length) return null;
+        return res[0];
     }
 }
