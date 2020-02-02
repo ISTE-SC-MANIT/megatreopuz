@@ -12,7 +12,7 @@ export default class MutationClass {
         const user = await UserModel.findOne({
             email: context.user.email
         });
-        console.log(await UserModel.remove({ email: context.user.email }));
+        await UserModel.deleteOne({ email: context.user.email });
 
         return user;
     }
