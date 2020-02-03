@@ -1,11 +1,5 @@
 import UserModel, { User } from "./user";
-import {
-    Resolver,
-    FieldResolver,
-    Root,
-    Int,
-    ResolverInterface
-} from "type-graphql";
+import { Resolver, FieldResolver, Root, Int } from "type-graphql";
 
 import "reflect-metadata";
 
@@ -19,14 +13,13 @@ export default class UserFieldResolvers {
         lastAnsweredQuestionTime: User["lastAnsweredQuestionTime"]
     ) {
         if (!totalQuestionsAnswered) return null;
-        return UserModel.count({
-            lastAnsweredQuestion: { $ne: 0 },
+        return UserModel.countDocuments({
             $or: [
                 { totalQuestionsAnswered: { $lt: totalQuestionsAnswered } },
                 {
                     totalQuestionsAnswered: { $eq: totalQuestionsAnswered },
                     lastAnsweredQuestionTime: {
-                        $gt: { lastAnsweredQuestionTime }
+                        $gte: lastAnsweredQuestionTime
                     }
                 }
             ]
