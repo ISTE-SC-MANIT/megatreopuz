@@ -45,6 +45,10 @@ app.post("/authenticate", express.json(), async (req, res) => {
     const {
         body: { email }
     } = req;
+    if (!email) {
+        res.sendStatus(400);
+        return;
+    }
     const user = await User.findOne({ email: email });
     if (user) {
         res.json({ exists: true });
