@@ -57,6 +57,29 @@ app.post("/authenticate", express.json(), async (req, res) => {
     }
 });
 
+app.post("/authenticateWithToken", express.json(), async (req, res) => {
+    const {
+        body: { token }
+    } = req;
+    if (!token) {
+        res.sendStatus(400);
+        return;
+    }
+    try {
+        const u = await getProfileFromGoogle(token);
+
+        const user = await User.findOne({ email: u.email });
+        if (user) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
+});
+
 app.post("/signUp", express.json(), async (req, res) => {
     const {
         body: { token, college, year, phone, country, username }
