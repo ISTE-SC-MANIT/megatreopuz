@@ -9,7 +9,7 @@ export class UserInput {
     phone?: String;
 
     @Field({ nullable: true })
-    year?: String;
+    year?: number;
 
     @Field({ nullable: true })
     country?: String;

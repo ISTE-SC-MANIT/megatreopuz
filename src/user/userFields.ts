@@ -1,21 +1,16 @@
-import UserModel, { User } from "../user/user";
-import { Resolver, FieldResolver, Root, Int, ResolverInterface } from "type-graphql";
+import UserModel, { User } from "./user";
+import {
+    Resolver,
+    FieldResolver,
+    Root,
+    Int,
+    ResolverInterface
+} from "type-graphql";
 
 import "reflect-metadata";
 
 @Resolver(of => User)
-export default class UserFieldResolvers{
-    @FieldResolver(type => Int, { nullable: true })
-    async lastAnswerTime(
-        @Root("lastAnsweredQuestion")
-        lastAnsweredQuestion: User["lastAnsweredQuestion"],
-        @Root("lastAnsweredQuestionTime")
-        lastAnsweredQuestionTime: User["lastAnsweredQuestionTime"]
-    ) {
-        if (!lastAnsweredQuestion || !lastAnsweredQuestionTime) return null;
-        return lastAnsweredQuestionTime.getTime();
-    }
-
+export default class UserFieldResolvers {
     @FieldResolver(returns => Int, { nullable: true })
     async rank(
         @Root("totalQuestionsAnswered")

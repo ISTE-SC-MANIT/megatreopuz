@@ -9,6 +9,7 @@ export default class QueryClass {
     @Authorized("USER")
     async viewer(@Ctx() context: Context) {
         const user = await UserModel.findOne({ email: context.user.email });
+        user.id = user._id;
         return user;
     }
 }

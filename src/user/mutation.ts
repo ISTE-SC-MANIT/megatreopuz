@@ -9,11 +9,11 @@ export default class MutationClass {
     @Mutation(returns => User)
     @Authorized("USER")
     async deleteUser(@Ctx() context: Context) {
-        const user = await UserModel.findOne({
+        const user = await UserModel.findOneAndDelete({
             email: context.user.email
         });
-        await UserModel.deleteOne({ email: context.user.email });
-
+        if (!user) return null;
+        user.id = user._id;
         return user;
     }
 
@@ -23,13 +23,6 @@ export default class MutationClass {
         @Arg("userInfo") userInput: UserInput,
         @Ctx() context: Context
     ) {
-        const currrentUser = await UserModel.findOne({
-            email: context.user.email
-        });
-        if (!currrentUser) {
-            throw new Error("Invalid User");
-        }
-
         const payload: Partial<UserInput> = {};
 
         if (userInput.college) payload.college = userInput.college;
@@ -37,7 +30,7 @@ export default class MutationClass {
         if (userInput.country) payload.country = userInput.country;
         if (userInput.phone) payload.phone = userInput.phone;
 
-        await UserModel.updateOne(
+        const user = await UserModel.findOneAndUpdate(
             { email: context.user.email },
             {
                 $set: { ...payload }
@@ -46,6 +39,10 @@ export default class MutationClass {
                 new: true
             }
         );
-        return UserModel.findOne({ email: context.user.email });
+
+        if (!user) return null;
+
+        user.id = user._id;
+        return user;
     }
 }

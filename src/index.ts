@@ -7,13 +7,13 @@ import graphqlHttp from "express-graphql";
 import { buildSchema } from "type-graphql";
 import UserQuery from "./user/query";
 import UserMutation from "./user/mutation";
+import QuestionMutation from "./question/mutation";
 import expressPlayground from "graphql-playground-middleware-express";
 import uuid from "uuid/v4";
 import cors from "cors";
 import { authorizationLevel } from "./auth";
-import UserFieldResolvers from "./resolver/userFields";
+import UserFieldResolvers from "./user/userFields";
 import QuestionQuery from "./question/query";
-// import AnswerMutation from "./answer/answerquestion";
 env.config();
 
 const app = express();
@@ -63,7 +63,7 @@ app.post("/signUp", express.json(), async (req, res) => {
             return;
         }
         await new User({
-            id: uuid(),
+            _id: uuid(),
             userName: username,
             name: profile.name,
             email: profile.email,
@@ -93,7 +93,8 @@ const schema = buildSchema({
         UserQuery,
         UserFieldResolvers,
         UserMutation,
-        QuestionQuery /* , AnswerMutation */
+        QuestionQuery,
+        QuestionMutation
     ],
     dateScalarMode: "timestamp",
     authChecker: authorizationLevel
@@ -136,7 +137,8 @@ mongoose
         {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            useCreateIndex: true
+            useCreateIndex: true,
+            useFindAndModify: false
         }
     )
     .then(() =>

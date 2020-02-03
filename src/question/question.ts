@@ -1,14 +1,16 @@
 import { prop as Property, getModelForClass } from "@typegoose/typegoose";
-import { Field, ObjectType } from "type-graphql";
+import { Field, ObjectType, Int } from "type-graphql";
 @ObjectType()
 export class Question {
-    @Field()
     @Property({ required: true })
+    _id: string;
+
+    @Field()
     id: string;
-    
-    @Field()
+
+    @Field(type => Int)
     @Property({ required: true })
-    questionNo: Number;
+    questionNo: number;
 
     @Field()
     @Property({ required: true })
