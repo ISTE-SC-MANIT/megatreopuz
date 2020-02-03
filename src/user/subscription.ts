@@ -1,4 +1,4 @@
-import { Context } from "./../../out/index.d";
+import { Context } from "../index";
 import { Subscription, Int, Authorized, Root, Ctx } from "type-graphql";
 import UserModel from "./user";
 export default class SubscriptionClass {
