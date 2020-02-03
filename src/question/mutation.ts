@@ -32,6 +32,28 @@ export default class MutationClass {
         return q;
     }
 
+    @Mutation(returns => Question, { nullable: true })
+    @Authorized("ADMIN")
+    async updateQuestion(@Arg("question") question: QuestionInput) {
+        const filteredAnswer = question.answer.replace(/[^0-9a-z]/gi, "");
+        const ansHash = hashAnswer(filteredAnswer);
+        const q = await QuestionModel.findOneAndUpdate(
+            {
+                questionNo: question.questionNo
+            },
+            {
+                $set: { ...question, answer: ansHash }
+            },
+            {
+                new: true,
+                upsert: true
+            }
+        );
+        if (!q) return null;
+        q.id = q._id;
+        return q;
+    }
+
     @Authorized("ADMIN")
     @Mutation(returns => Question, { nullable: true })
     async deleteQuestion(@Arg("input") input: QuestionNumberInput) {

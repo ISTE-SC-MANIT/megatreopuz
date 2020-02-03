@@ -1,11 +1,13 @@
 import express from "express";
 import env from "dotenv";
 import mongoose from "mongoose";
-import { OAuth2Client, TokenPayload } from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
+import { SubscriptionServer } from "subscriptions-transport-ws";
 import User, { User as UserClass } from "./user/user";
 import graphqlHttp from "express-graphql";
 import { buildSchema } from "type-graphql";
 import UserQuery from "./user/query";
+import { execute, subscribe } from "graphql";
 import UserMutation from "./user/mutation";
 import QuestionMutation from "./question/mutation";
 import expressPlayground from "graphql-playground-middleware-express";
@@ -14,6 +16,11 @@ import cors from "cors";
 import { authorizationLevel } from "./auth";
 import UserFieldResolvers from "./user/userFields";
 import QuestionQuery from "./question/query";
+import StateQuery from "./state/query";
+import StateMutation from "./state/mutation";
+import StateSubscription from "./state/subscription";
+import { createServer } from "http";
+import UserSubscription from "./user/subscription";
 env.config();
 
 const app = express();
@@ -82,6 +89,7 @@ app.post("/signUp", express.json(), async (req, res) => {
                 res.sendStatus(201);
             });
     } catch (error) {
+        console.error(error);
         res.status(500).send(error);
         return;
     }
@@ -93,8 +101,12 @@ const schema = buildSchema({
         UserQuery,
         UserFieldResolvers,
         UserMutation,
+        UserSubscription,
         QuestionQuery,
-        QuestionMutation
+        QuestionMutation,
+        StateQuery,
+        StateMutation,
+        StateSubscription
     ],
     dateScalarMode: "timestamp",
     authChecker: authorizationLevel
@@ -116,6 +128,7 @@ app.use("/graphql", async (req, res, next) => {
             }
             user = await User.findOne({ email: u.email });
         } catch (error) {
+            console.error(error);
             res.status(500).send(error);
             return null;
         }
@@ -129,22 +142,38 @@ app.use("/graphql", async (req, res, next) => {
     })(req, res);
 });
 
-app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
+app.get(
+    "/playground",
+    expressPlayground({
+        endpoint: "/graphql",
+        subscriptionEndpoint: "/subscriptions"
+    })
+);
 
+const server = createServer(app);
 mongoose
-    .connect(
-        "mongodb+srv://Devansh:Devansh@cluster0-ixpyc.mongodb.net/beta?retryWrites=true&w=majority",
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useCreateIndex: true,
-            useFindAndModify: false
-        }
-    )
+    .connect(process.env.DB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false
+    })
     .then(() =>
-        app.listen(process.env.PORT || 3000, () =>
-            console.log(`listening on port ${process.env.PORT || 3000}`)
-        )
+        server.listen(process.env.PORT || 3000, async () => {
+            const resolvedSchema = await schema;
+            new SubscriptionServer(
+                {
+                    execute,
+                    subscribe,
+                    schema: resolvedSchema
+                },
+                {
+                    server,
+                    path: "/subscriptions"
+                }
+            );
+            console.log(`listening on port ${process.env.PORT || 3000}`);
+        })
     )
     .catch(error => {
         console.error(error);

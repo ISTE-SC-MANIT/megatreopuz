@@ -1,8 +1,7 @@
 import crypto from "crypto";
-const myRandomString = "YouPossiblyCannotGuessThisSalt";
 
 export function hashAnswer(answer: string) {
-    const hash = crypto.createHmac("sha512", myRandomString);
+    const hash = crypto.createHmac("sha512", process.env.SALT);
     hash.push(answer);
     return hash.digest("hex");
 }

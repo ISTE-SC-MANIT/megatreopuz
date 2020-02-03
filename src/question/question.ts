@@ -1,5 +1,10 @@
-import { prop as Property, getModelForClass } from "@typegoose/typegoose";
+import {
+    prop as Property,
+    getModelForClass,
+    index
+} from "@typegoose/typegoose";
 import { Field, ObjectType, Int } from "type-graphql";
+@index({ questionNo: 1 }, { unique: true })
 @ObjectType()
 export class Question {
     @Property({ required: true })
@@ -16,7 +21,6 @@ export class Question {
     @Property({ required: true })
     description: string;
 
-    @Field()
     @Property({ required: true })
     answer: string;
 
