@@ -179,17 +179,14 @@ app.get(
 
 const server = createServer(app);
 mongoose
-  .connect(
-    "mongodb+srv://Devansh:Devansh@cluster0-ixpyc.mongodb.net/beta?retryWrites=true&w=majority",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false
-    }
-  )
+  .connect(process.env.DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+  })
   .then(() =>
-    server.listen(process.env.PORT || 8000, async () => {
+    server.listen(process.env.PORT || 8080, async () => {
       const resolvedSchema = await schema;
       new SubscriptionServer(
         {
@@ -202,7 +199,7 @@ mongoose
           path: "/subscriptions"
         }
       );
-      console.log(`listening on port ${process.env.PORT || 8000}`);
+      console.log(`listening on port ${process.env.PORT || 8080}`);
     })
   )
   .catch(error => {
