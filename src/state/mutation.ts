@@ -1,10 +1,10 @@
 import { Authorized, PubSub } from "type-graphql";
 import { PubSubEngine } from "graphql-subscriptions";
 import { Mutation, Resolver, Arg } from "type-graphql";
-import StateModel from "./state";
+import StateModel, { ContestState } from "./state";
 @Resolver()
 export default class MutationClass {
-    @Mutation(returns => Boolean)
+    @Mutation(returns => ContestState)
     @Authorized("ADMIN")
     async updateState(
         @PubSub() pubSub: PubSubEngine,
@@ -23,11 +23,9 @@ export default class MutationClass {
                 new: true
             }
         );
-        let res: boolean;
-        if (!s) res = false;
-        res = s.active;
-
-        await pubSub.publish("STATE", res);
-        return res;
+        if (!s) return null;
+        s.id = s._id;
+        await pubSub.publish("STATE", s);
+        return s;
     }
 }

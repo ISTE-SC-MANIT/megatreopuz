@@ -4,8 +4,9 @@ import {
     index
 } from "@typegoose/typegoose";
 import { Field, ObjectType, Int } from "type-graphql";
+import { Node } from "../node";
 @index({ questionNo: 1 }, { unique: true })
-@ObjectType()
+@ObjectType({ implements: Node })
 export class Question {
     @Property({ required: true })
     _id: string;
@@ -27,6 +28,15 @@ export class Question {
     @Field()
     @Property({ required: true })
     imgUrl: string;
+}
+
+@ObjectType({ implements: Node })
+export class AnswerResponse {
+    @Field()
+    id: string;
+
+    @Field()
+    valid: boolean;
 }
 
 export default getModelForClass(Question);

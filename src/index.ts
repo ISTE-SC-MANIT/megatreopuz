@@ -30,178 +30,198 @@ app.use(cors());
 app.use("/static", express.static("static"));
 
 async function getProfileFromGoogle(token: string) {
-  const client = new OAuth2Client(
-    `65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com`
-  );
+    const client = new OAuth2Client(
+        `65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com`
+    );
 
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: `65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com`
-  });
-  return ticket.getPayload();
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: `65422568192-gsadmvg60atvtnpqvs3t0r43f213sgme.apps.googleusercontent.com`
+    });
+    return ticket.getPayload();
 }
 
 app.post("/authenticate", express.json(), async (req, res) => {
-  const {
-    body: { email }
-  } = req;
-  if (!email) {
-    res.sendStatus(400);
-    return;
-  }
-  const user = await User.findOne({ email: email });
-  if (user) {
-    res.json({ exists: true });
-  } else {
-    res.json({ exists: false });
-  }
+    const {
+        body: { email }
+    } = req;
+    if (!email) {
+        res.sendStatus(400);
+        return;
+    }
+    const user = await User.findOne({ email: email });
+    if (user) {
+        res.json({ exists: true });
+    } else {
+        res.json({ exists: false });
+    }
 });
 
 app.post("/authenticateWithToken", express.json(), async (req, res) => {
-  const {
-    body: { token }
-  } = req;
-  if (!token) {
-    res.sendStatus(400);
-    return;
-  }
-  try {
-    const u = await getProfileFromGoogle(token);
-
-    const user = await User.findOne({ email: u.email });
-    if (user) {
-      res.json({ exists: true });
-    } else {
-      res.json({ exists: false });
+    const {
+        body: { token }
+    } = req;
+    if (!token) {
+        res.sendStatus(400);
+        return;
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send(error);
-  }
+    try {
+        const u = await getProfileFromGoogle(token);
+
+        const user = await User.findOne({ email: u.email });
+        if (user) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
 });
 
 app.post("/signUp", express.json(), async (req, res) => {
-  const {
-    body: { token, college, year, phone, country, username }
-  } = req;
+    const {
+        body: { token, college, year, phone, country, username }
+    } = req;
 
-  if (!token || !college || !year || !phone || !country || !username) {
-    res.sendStatus(400);
-    return;
-  }
-
-  try {
-    const profile = await getProfileFromGoogle(token);
-    if (!profile || !profile.email) {
-      res.sendStatus(401);
-      return;
+    if (!token || !college || !year || !phone || !country || !username) {
+        res.sendStatus(400);
+        return;
     }
-    await new User({
-      _id: uuid(),
-      userName: username,
-      name: profile.name,
-      email: profile.email,
-      phone: phone,
-      college: college,
-      year: year,
-      country: country,
-      admin: false,
-      currentQuestion: 1,
-      totalQuestionsAnswered: 0,
-      lastAnsweredQuestion: 0,
-      lastAnsweredQuestionTime: "2020-02-01T16:42:50.859Z"
-    })
-      .save()
-      .then(newUser => {
-        res.sendStatus(201);
-      });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send(error);
-    return;
-  }
+
+    try {
+        const profile = await getProfileFromGoogle(token);
+        if (!profile || !profile.email) {
+            res.sendStatus(401);
+            return;
+        }
+        await new User({
+            _id: uuid(),
+            userName: username,
+            name: profile.name,
+            email: profile.email,
+            phone: phone,
+            college: college,
+            year: year,
+            country: country,
+            admin: false,
+            currentQuestion: 1,
+            totalQuestionsAnswered: 0,
+            lastAnsweredQuestion: 0,
+            lastAnsweredQuestionTime: "2020-02-01T16:42:50.859Z"
+        })
+            .save()
+            .then(newUser => {
+                res.sendStatus(201);
+            });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+        return;
+    }
 });
 
 const schema = buildSchema({
-  validate: false,
-  resolvers: [
-    UserQuery,
-    UserFieldResolvers,
-    UserMutation,
-    UserSubscription,
-    QuestionQuery,
-    QuestionMutation,
-    StateQuery,
-    StateMutation,
-    StateSubscription
-  ],
-  dateScalarMode: "timestamp",
-  authChecker: authorizationLevel
+    validate: false,
+    resolvers: [
+        UserQuery,
+        UserFieldResolvers,
+        UserMutation,
+        UserSubscription,
+        QuestionQuery,
+        QuestionMutation,
+        StateQuery,
+        StateMutation,
+        StateSubscription
+    ],
+    dateScalarMode: "timestamp",
+    authChecker: authorizationLevel
 });
 
 export interface Context {
-  user?: UserClass;
+    user?: UserClass;
 }
 
 app.use("/graphql", async (req, res, next) => {
-  const token = req.get("authorization");
-  let user: UserClass | null = null;
-  if (token) {
-    try {
-      const u = await getProfileFromGoogle(token);
-      if (!u) {
-        res.sendStatus(400);
-        return null;
-      }
-      user = await User.findOne({ email: u.email });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error);
-      return null;
+    const token = req.get("authorization");
+    let user: UserClass | null = null;
+    if (token) {
+        try {
+            const u = await getProfileFromGoogle(token);
+            if (!u) {
+                res.sendStatus(400);
+                return null;
+            }
+            user = await User.findOne({ email: u.email });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send(error);
+            return null;
+        }
     }
-  }
-  const resolvedSchema = await schema;
-  return graphqlHttp({
-    schema: resolvedSchema,
-    context: {
-      user
-    }
-  })(req, res);
+    const resolvedSchema = await schema;
+    return graphqlHttp({
+        schema: resolvedSchema,
+        context: {
+            user
+        }
+    })(req, res);
 });
 
 app.get(
-  "/playground",
-  expressPlayground({
-    endpoint: "/graphql",
-    subscriptionEndpoint: "/subscriptions"
-  })
+    "/playground",
+    expressPlayground({
+        endpoint: "/graphql",
+        subscriptionEndpoint: "/graphql"
+    })
 );
 
 const server = createServer(app);
 mongoose
-  .connect(process.env.DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false
-  })
-  .then(() =>
-    server.listen(process.env.PORT || 8080, async () => {
-      const resolvedSchema = await schema;
-      new SubscriptionServer(
-        {
-          execute,
-          subscribe,
-          schema: resolvedSchema
-        },
-        {
-          server,
-          path: "/subscriptions"
-        }
-      );
-      console.log(`listening on port ${process.env.PORT || 8080}`);
+    .connect(process.env.DB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false
     })
-  )
-  .catch(error => {
-    console.error(error);
-  });
+    .then(() =>
+        server.listen(process.env.PORT || 8080, async () => {
+            const resolvedSchema = await schema;
+            new SubscriptionServer(
+                {
+                    execute,
+                    subscribe,
+                    schema: resolvedSchema,
+                    onConnect: (
+                        connectionParams: Record<string, string>,
+                        webSocket: any
+                    ) => {
+                        const { authorization: token } = connectionParams;
+                        if (token)
+                            return getProfileFromGoogle(token)
+                                .then(value => {
+                                    if (!value)
+                                        throw new Error("Illegal token");
+                                    return value.email;
+                                })
+                                .then(email => User.findOne({ email }))
+                                .then(user => {
+                                    return { user } as Context;
+                                })
+                                .catch(console.error);
+                        else return { user: null } as Context;
+                    }
+                },
+                {
+                    lazy: true,
+                    server,
+                    path: "/graphql"
+                }
+            );
+            console.log(`listening on port ${process.env.PORT || 8080}`);
+        })
+    )
+    .catch(error => {
+        console.error(error);
+    });

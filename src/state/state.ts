@@ -1,8 +1,15 @@
-import { getModelForClass, prop, index } from "@typegoose/typegoose";
-import { Field, ObjectType, Int } from "type-graphql";
+import { getModelForClass, prop } from "@typegoose/typegoose";
+import { Field, ObjectType } from "type-graphql";
+import { Node } from "../node";
 
-@ObjectType()
+@ObjectType({ implements: Node })
 export class ContestState {
+    @prop({ required: true })
+    _id: string;
+
+    @Field()
+    id: string;
+
     @prop({ required: true })
     @Field()
     active: boolean;

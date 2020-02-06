@@ -1,8 +1,18 @@
 import { getModelForClass, prop, index } from "@typegoose/typegoose";
 import { Field, ObjectType, Int } from "type-graphql";
+import { Node } from "../node";
+
+@ObjectType({ implements: Node })
+export class Rank {
+    @Field()
+    id: string;
+
+    @Field()
+    rank: number;
+}
 
 @index({ email: 1 }, { unique: true })
-@ObjectType()
+@ObjectType({ implements: Node })
 export class User {
     @prop({ required: true })
     _id: string;

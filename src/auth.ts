@@ -11,7 +11,6 @@ export function authorizationLevel(
 ) {
     const { user } = context;
     if (!user) return Boolean(roles.find(item => item === Roles.NONE));
-
     if (user.admin) return true;
     return Boolean(
         roles.find(item => item === Roles.NONE || item === Roles.USER)

@@ -1,5 +1,5 @@
 import { Context } from "../index";
-import { Subscription, Int, Authorized, Root, Ctx } from "type-graphql";
+import { Subscription, Int, Authorized, Ctx } from "type-graphql";
 import UserModel from "./user";
 export default class SubscriptionClass {
     @Authorized("USER")

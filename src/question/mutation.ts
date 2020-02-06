@@ -1,10 +1,10 @@
-import QuestionModel, { Question } from "./question";
+import QuestionModel, { Question, AnswerResponse } from "./question";
 import { Context } from "../index";
 import "reflect-metadata";
 import { Resolver, Arg, Ctx, Mutation, Authorized } from "type-graphql";
 import QuestionInput from "./questionInput";
 import { v4 } from "uuid";
-import { hashAnswer } from "./util";
+import { hashAnswer, verifyAnswer } from "./util";
 import QuestionNumberInput from "./questionNumberInput";
 import UserModel from "../user/user";
 @Resolver()
@@ -13,7 +13,9 @@ export default class MutationClass {
     @Authorized("ADMIN")
     async createQuestion(@Arg("question") question: QuestionInput) {
         const id = v4();
-        const filteredAnswer = question.answer.replace(/[^0-9a-z]/gi, "");
+        const filteredAnswer = question.answer
+            .toLowerCase()
+            .replace(/[^0-9a-z]/gi, "");
         const ansHash = hashAnswer(filteredAnswer);
         const q = await QuestionModel.findOneAndUpdate(
             {
@@ -35,7 +37,9 @@ export default class MutationClass {
     @Mutation(returns => Question, { nullable: true })
     @Authorized("ADMIN")
     async updateQuestion(@Arg("question") question: QuestionInput) {
-        const filteredAnswer = question.answer.replace(/[^0-9a-z]/gi, "");
+        const filteredAnswer = question.answer
+            .toLowerCase()
+            .replace(/[^0-9a-z]/gi, "");
         const ansHash = hashAnswer(filteredAnswer);
         const q = await QuestionModel.findOneAndUpdate(
             {
@@ -67,7 +71,7 @@ export default class MutationClass {
     }
 
     @Authorized("USER")
-    @Mutation(type => Boolean, { nullable: true })
+    @Mutation(type => AnswerResponse, { nullable: true })
     async answerQuestion(
         @Ctx() context: Context,
         @Arg("answer") answer: string
@@ -78,20 +82,24 @@ export default class MutationClass {
         })
             .sort({ questionNo: 1 })
             .limit(1);
-        const filtered = answer.replace(/[^0-9a-z]/gi, "");
+        const filtered = answer.toLowerCase().replace(/[^0-9a-z]/gi, "");
         if (!res || !res.length) return null;
         const question = res[0];
-        const result = hashAnswer(filtered) === question.answer;
-        await UserModel.findOneAndUpdate(
-            { email: context.user.email },
-            {
-                $set: {
-                    lastAnsweredQuestion: res[0].questionNo,
-                    totalQuestionsAnswered: user.totalQuestionsAnswered + 1,
-                    lastAnsweredQuestionTime: new Date()
+        const result = verifyAnswer(question.answer, filtered);
+        if (result)
+            await UserModel.findOneAndUpdate(
+                { email: context.user.email },
+                {
+                    $set: {
+                        lastAnsweredQuestion: res[0].questionNo,
+                        totalQuestionsAnswered: user.totalQuestionsAnswered + 1,
+                        lastAnsweredQuestionTime: new Date()
+                    }
                 }
-            }
-        );
-        return result;
+            );
+        const a = new AnswerResponse();
+        a.id = `answer-${question._id}`;
+        a.valid = result;
+        return a;
     }
 }
