@@ -5,7 +5,7 @@ import {
   LeaderBoardCursorScalar
 } from "../customScalars/leaderboardCursor";
 @ObjectType()
-export class PageInfo {
+export class LeaderBoardPageInfo {
   @Field(type => LeaderBoardCursorScalar)
   endCursor: LeaderBoardCursorObject;
 
@@ -28,5 +28,5 @@ export class LeaderBoardConnection {
   edges: UserEdge[];
 
   @Field()
-  pageInfo: PageInfo;
+  pageInfo: LeaderBoardPageInfo;
 }

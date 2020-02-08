@@ -18,6 +18,7 @@ export default class QueryClass {
       .sort({ questionNo: 1 })
       .limit(1);
 
+
     if (!res || !res.length) return null;
     return res[0];
   }
