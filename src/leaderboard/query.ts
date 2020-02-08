@@ -37,14 +37,28 @@ export default class LeaderBoardQuery {
                 return u;
             });
         } else {
-            const middle = (UserModel.find({
-                totalQuestionsAnswered: { $gt: after.totalQuestionsAnswered }
+            const middle = await UserModel.find({
+                $or: [
+                    {
+                        totalQuestionsAnswered: {
+                            $lt: after.totalQuestionsAnswered
+                        }
+                    },
+                    {
+                        totalQuestionsAnswered: {
+                            $eq: after.totalQuestionsAnswered
+                        },
+                        lastAnsweredQuestionTime: {
+                            $gt: after.lastAnsweredQuestionTime
+                        }
+                    }
+                ]
             })
                 .sort({
                     totalQuestionsAnswered: -1,
                     lastAnsweredQuestionTime: 1
                 })
-                .limit(first) as unknown) as User[];
+                .limit(first + 1);
             edges.edges = middle.map((contestant: User) => {
                 const u = new UserEdge();
                 u.node = contestant;
@@ -66,7 +80,6 @@ export default class LeaderBoardQuery {
                 lastUser.node.lastAnsweredQuestionTime.getTime().toString()
             );
         } else edges.pageInfo.endCursor = new LeaderBoardCursorObject(0, "0");
-
         return edges;
     }
 }

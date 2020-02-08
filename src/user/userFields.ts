@@ -21,7 +21,7 @@ export default class UserFieldResolvers {
                 {
                     totalQuestionsAnswered: { $eq: totalQuestionsAnswered },
                     lastAnsweredQuestionTime: {
-                        $gte: lastAnsweredQuestionTime
+                        $gt: lastAnsweredQuestionTime
                     }
                 }
             ]
