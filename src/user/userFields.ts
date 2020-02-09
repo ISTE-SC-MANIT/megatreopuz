@@ -21,13 +21,13 @@ export default class UserFieldResolvers {
                 {
                     totalQuestionsAnswered: { $eq: totalQuestionsAnswered },
                     lastAnsweredQuestionTime: {
-                        $gt: lastAnsweredQuestionTime
+                        $lt: lastAnsweredQuestionTime
                     }
                 }
             ]
         });
         const rank = new Rank();
-        rank.rank = n;
+        rank.rank = n + 1;
         rank.id = `rank-${id}`;
         return rank;
     }

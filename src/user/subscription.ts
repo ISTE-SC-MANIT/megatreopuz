@@ -20,7 +20,7 @@ export default class SubscriptionClass {
                 {
                     totalQuestionsAnswered: { $eq: totalQuestionsAnswered },
                     lastAnsweredQuestionTime: {
-                        $gte: lastAnsweredQuestionTime
+                        $lt: lastAnsweredQuestionTime
                     }
                 }
             ]
