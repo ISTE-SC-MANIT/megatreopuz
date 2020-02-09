@@ -71,7 +71,9 @@ export default class LeaderBoardQuery {
         }
         if (edges.edges.length === first + 1) edges.edges.pop();
         edges.pageInfo = new LeaderBoardPageInfo();
-        edges.pageInfo.hasNextPage = edges.edges.length === first + 1;
+        edges.pageInfo.hasNextPage = edges.edges.length === first;
+
+        edges.pageInfo.hasPreviousPage = Boolean(after);
 
         const lastUser = edges.edges[edges.edges.length - 1];
         if (lastUser) {
@@ -80,6 +82,14 @@ export default class LeaderBoardQuery {
                 lastUser.node.lastAnsweredQuestionTime.getTime().toString()
             );
         } else edges.pageInfo.endCursor = new LeaderBoardCursorObject(0, "0");
+
+        const firstUser = edges.edges[0];
+        if (firstUser) {
+            edges.pageInfo.startCursor = new LeaderBoardCursorObject(
+                firstUser.node.totalQuestionsAnswered,
+                firstUser.node.lastAnsweredQuestionTime.getTime().toString()
+            );
+        } else edges.pageInfo.startCursor = new LeaderBoardCursorObject(0, "0");
         return edges;
     }
 }
